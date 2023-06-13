@@ -15,126 +15,97 @@ class Articles(BaseModel):
 
 class ProductRouter:
     articles = [
-        {"itemId": "item_id", "itemName": "item_name", "price_id": "prices"},
-        {"itemId": "item_id1", "itemName": "item_name1", "itemPrice": "prices1"},
-        {"itemId": "item_id2", "itemName": "item_name2", "itemPrice": "prices2"},
-        {"itemId": "item_id3", "itemName": "item_name3", "itemPrice": "prices3"}
+        {"itemId": "item_id", "itemName": "item_name", "itemPrice": "item_price"},
+        {"itemId": "item_id1", "itemName": "item_name1", "itemPrice": "item_price1"},
+        {"itemId": "item_id2", "itemName": "item_name2", "itemPrice": "item_price2"},
+        {"itemId": "item_id3", "itemName": "item_name3", "itemPrice": "item_price3"}
     ]
 
     @app.get("/products")
-    async def get_articles(self):
+    async def get_articles():
         return {
-            "articles": self.articles,
+            "articles": ProductRouter.articles,
             "limit": 10,
-            "total": 2,
+            "total": len(ProductRouter.articles),
             "skip": 0
         }
 
     @app.get("/products/{itemId}")
-    async def get_item(self, itemId: int, response: Response):
+    async def get_item(itemId: int, response: Response):
         try:
-            corresponding_product = self.articles[itemId - 1]
+            corresponding_product = ProductRouter.articles[itemId - 1]
             return corresponding_product
-        except:
+        except IndexError:
             raise HTTPException(
-                status.HTTP_404_NOT_FOUND,
+                status_code=status.HTTP_404_NOT_FOUND,
                 detail="Article not found"
             )
 
     @app.post("/products")
-    async def create_article(self, payload: Articles, response: Response):
-        print(payload.itemName)
-        self.articles.append(payload.dict())
+    async def create_article(payload: Articles, response: Response):
+        ProductRouter.articles.append(payload.dict())
         response.status_code = status.HTTP_201_CREATED
         return {
             "message": f"{payload.itemName} added successfully"
         }
 
     @app.delete("/products/{itemId}")
-    async def delete_item(self, itemId: int, response: Response):
+    async def delete_item(itemId: int, response: Response):
         try:
-            self.articles.pop(itemId - 1)
+            ProductRouter.articles.pop(itemId - 1)
             response.status_code = status.HTTP_204_NO_CONTENT
-        except:
+        except IndexError:
             raise HTTPException(
-                status.HTTP_404_NOT_FOUND,
+                status_code=status.HTTP_404_NOT_FOUND,
                 detail="Item not found"
             )
 
     @app.put("/products/{itemId}")
-    async def replace_item(self, itemId: int, payload: Articles, response: Response):
+    async def replace_item(itemId: int, payload: Articles, response: Response):
         try:
-            self.articles[itemId - 1] = payload.dict()
+            ProductRouter.articles[itemId - 1] = payload.dict()
             return {"message": f"Item successfully updated: {payload.itemName}"}
-        except:
+        except IndexError:
             raise HTTPException(
-                status.HTTP_404_NOT_FOUND,
+                status_code=status.HTTP_404_NOT_FOUND,
                 detail="Item not found"
             )
 
 class User(BaseModel):
     username: str
-    email: str | None = None
-    full_name: str | None = None
-    disabled: bool | None = None
+    email: Optional[str] = None
+    full_name: Optional[str] = None
+    disabled: Optional[bool] = None
 
 class UserRouter:
-    user = [
+    users = [
         {"userId": "user_id1"},
         {"userId": "user_id2"},
         {"userId": "user_id3"}
     ]
 
     @app.get("/users")
-    async def get_user(self):
-        return {"user": self.user}
+    async def get_users():
+        return {"users": UserRouter.users}
 
     @app.get("/users/{userId}")
-    async def get_user_byID(self, userId: int, response: Response):
+    async def get_user_by_id(userId: int, response: Response):
         try:
-            corresponding_user = self.user[userId - 1]
+            corresponding_user = UserRouter.users[userId - 1]
             return corresponding_user
-        except:
+        except IndexError:
             raise HTTPException(
-                status.HTTP_404_NOT_FOUND,
+                status_code=status.HTTP_404_NOT_FOUND,
                 detail="User not found"
             )
 
     @app.post("/users")
-    async def create_user(self, payload: User, response: Response):
-        print(payload.username)
-        self.user.append(payload.dict())
-        response.status_code = status.HTTP
-        
+    async def create_user(payload: User, response: Response):
+        UserRouter.users.append(payload.dict())
+        response.status_code = status.HTTP_201_CREATED
+
 class Transactions(BaseModel):
     transactionId: int
     itemId: int
     quantity: int
-    amount: float
-class TransactionRouter:
-    transactions = [
-        {"transactionId": 1, "itemId": 1, "quantity": 2, "amount": 10.0},
-        {"transactionId": 2, "itemId": 2, "quantity": 1, "amount": 5.0},
-        {"transactionId": 3, "itemId": 3, "quantity": 3, "amount": 20.0}
-    ]
-
-    @app.get("/transactions")
-    async def get_transactions(self):
-        return {"transactions": self.transactions}
-
-    @app.get("/transactions/{transactionId}")
-    async def get_transaction(self, transactionId: int, response: Response):
-        try:
-            corresponding_transaction = self.transactions[transactionId - 1]
-            return corresponding_transaction
-        except:
-            raise HTTPException(
-                status.HTTP_404_NOT_FOUND,
-                detail="Transaction not found"
-            )
-
-    @app.post("/transactions")
-    async def create_transaction(self, payload: Transactions, response: Response):
-        print(payload.transactionId)
-        self.transactions.append(payload.dict())
-        response.status_code = status.HTTP_201_CREATED
+   
