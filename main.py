@@ -108,4 +108,29 @@ class Transactions(BaseModel):
     transactionId: int
     itemId: int
     quantity: int
-   
+class TransactionRouter:
+    transactions = [
+        {"transactionId": 1, "itemId": 1, "quantity": 2, "amount": 10.0},
+        {"transactionId": 2, "itemId": 2, "quantity": 1, "amount": 5.0},
+        {"transactionId": 3, "itemId": 3, "quantity": 3, "amount": 20.0}
+    ]
+
+    @app.get("/transactions")
+    async def get_transactions():
+        return {"transactions": TransactionRouter.transactions}
+
+    @app.get("/transactions/{transactionId}")
+    async def get_transaction(transactionId: int, response: Response):
+        try:
+            corresponding_transaction = TransactionRouter.transactions[transactionId - 1]
+            return corresponding_transaction
+        except IndexError:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Transaction not found"
+            )
+
+    @app.post("/transactions")
+    async def create_transaction(payload: Transactions, response: Response):
+        TransactionRouter.transactions.append(payload.dict())
+        response.status_code = status.HTTP_201_CREATED   
